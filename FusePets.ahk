@@ -184,34 +184,36 @@ exitMacro(*) {
 ; Return: None
 ; ----------------------------------------------------------------------------------------
 fusePets() {
-    petsToFuse := StrSplit(getSetting("Pets"), ",")  ; Retrieve the list of pets to be fused from settings.
     firstPet := [364, 209]  ; Coordinates for the first pet (center). Note Perfect centre (362, 208.5).
     petOffset := [101, 0]  ; Offset for subsequent pets.
-
-    for pet in petsToFuse {
-        petNumber := 0
-        Loop {
-            if petNumber > 4
-                break
-
-            currentPet := [firstPet[1] + (petOffset[1] * petNumber), firstPet[2]]  ; Calculate the coordinates for the current pet.
-            openSupercomputer()  ; Open the supercomputer interface.
-            findAndClickFuseButton()  ; Find and click the fuse button.
-            searchForPet(pet)  ; Search for the specified pet.
-            
-            if petMissing(currentPet) {
-                closeSuperComputer()  ; Close the supercomputer if the pet is missing.
-                break
-            }
-            
-            canBeFused := selectFuseAngle(currentPet)  ; Adjust the selection angle to find a position where the pet can be fused.
-            
-            if canBeFused {
-                clickOkButton()  ; Click the OK button to confirm the fusion.
-                clickSuccessButton()  ; Click the success button after fusion.
-            } else {
-                petNumber += 1  ; Move to the next pet if the current pet cannot be fused.
-                closeSuperComputer()  ; Close the supercomputer interface.
+    
+    Loop {
+        petsToFuse := StrSplit(getSetting("Pets"), ",")  ; Retrieve the list of pets to be fused from settings.
+        for pet in petsToFuse {
+            petNumber := 0
+            Loop {
+                if petNumber > 4
+                    break
+    
+                currentPet := [firstPet[1] + (petOffset[1] * petNumber), firstPet[2]]  ; Calculate the coordinates for the current pet.
+                openSupercomputer()  ; Open the supercomputer interface.
+                findAndClickFuseButton()  ; Find and click the fuse button.
+                searchForPet(pet)  ; Search for the specified pet.
+                
+                if petMissing(currentPet) {
+                    closeSuperComputer()  ; Close the supercomputer if the pet is missing.
+                    break
+                }
+                
+                canBeFused := selectFuseAngle(currentPet)  ; Adjust the selection angle to find a position where the pet can be fused.
+                
+                if canBeFused {
+                    clickOkButton()  ; Click the OK button to confirm the fusion.
+                    clickSuccessButton()  ; Click the success button after fusion.
+                } else {
+                    petNumber += 1  ; Move to the next pet if the current pet cannot be fused.
+                    closeSuperComputer()  ; Close the supercomputer interface.
+                }
             }
         }
     }
