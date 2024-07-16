@@ -209,7 +209,6 @@ fusePets() {
             if canBeFused {
                 clickOkButton()  ; Click the OK button to confirm the fusion.
                 clickSuccessButton()  ; Click the success button after fusion.
-                break  ; Exit the loop after successful fusion.
             } else {
                 petNumber += 1  ; Move to the next pet if the current pet cannot be fused.
                 closeSuperComputer()  ; Close the supercomputer interface.
