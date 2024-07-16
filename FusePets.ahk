@@ -26,12 +26,6 @@ MACRO_VERSION := "0.1.0"  ; Script version, helpful for user support and debuggi
 RADIUS := 150  ; Standard radius used for calculations in positioning or graphics.
 PI := 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679  ; Mathematical constant Pi, crucial for circular calculations.
 
-; Font settings for GUI and other text displays.
-TIMES_NEW_ROMAN := A_ScriptDir "\Assets\TimesNewRoman.ttf"  ; Path to Times New Roman font.
-TIMES_NEW_ROMAN_INVERTED := A_ScriptDir "\Assets\TimesNewRoman-Inverted.ttf"  ; Path to Times New Roman font (inverted).
-FREDOKA_ONE_REGULAR := A_ScriptDir "\Assets\FredokaOne-Regular.ttf"  ; Path to Fredoka One Regular font.
-SOURCE_SANS_PRO_BOLD := A_ScriptDir "\Assets\SourceSansPro-Bold.ttf"  ; Path to Source Sans Pro Bold font.
-
 ; User settings loaded from an INI file.
 SETTINGS_INI := A_ScriptDir "\Settings.ini"  ; Path to settings INI file.
 
@@ -100,7 +94,6 @@ displayMainGui() {
     ; Add control buttons to the GUI for various functions.
     btnPause := guiMain.AddButton("Section", "⏸ &Pause")
     btnWiki := guiMain.AddButton("yp", "🌐 &Wiki")
-    btnFont := guiMain.AddButton("yp", "𝔄 &Default Font")
 
     ; Display the GUI window.
     guiMain.Show("w300 h50")
@@ -112,7 +105,6 @@ displayMainGui() {
     ; Assign events to buttons for respective functionalities.
     btnPause.OnEvent("Click", pauseMacro)
     btnWiki.OnEvent("Click", openWiki)
-    btnFont.OnEvent("Click", changeToDefaultFont)
 }
 
 
@@ -173,29 +165,21 @@ exitMacro(*) {
 
 ; ----------------------------------------------------------------------------------------
 ; fusePets Function
-; Description: Fuses pets by interacting with the supercomputer, adjusting the selection angle, and confirming the fusion process.
+; Description: Fuses a list of pets by interacting with the game's supercomputer interface, handling various states and actions required for the fusion process.
 ; Operation:
 ;   - Retrieves the list of pets to be fused from settings.
-;   - Defines the coordinates for the first pet and the offset for subsequent pets.
-;   - Loops through each pet in the list and performs the following steps:
-;     - Opens the supercomputer interface.
-;     - Finds and clicks the fuse button.
-;     - Searches for the specified pet.
-;     - Checks if the pet is missing and closes the supercomputer if it is.
-;     - Adjusts the selection angle to find a position where the pet can be fused.
-;     - Clicks the OK button and success button if the pet can be fused.
-;     - Moves to the next pet if the current pet cannot be fused.
+;   - Iterates through the list of pets and attempts to fuse them using the supercomputer interface.
+;   - Checks if pets are missing and handles UI interactions for successful or failed fusions.
 ; Dependencies:
-;   - StrSplit: Splits a string into an array based on a delimiter.
-;   - getSetting: Retrieves a setting value.
-;   - openSupercomputer: Opens the supercomputer interface.
+;   - getSetting: Retrieves various settings, including the list of pets to fuse.
+;   - openSupercomputer: Ensures the supercomputer menu is opened.
 ;   - findAndClickFuseButton: Finds and clicks the fuse button.
 ;   - searchForPet: Searches for the specified pet.
 ;   - petMissing: Checks if the specified pet is missing.
+;   - closeSuperComputer: Closes the supercomputer interface.
 ;   - selectFuseAngle: Adjusts the selection angle to find a position where the pet can be fused.
 ;   - clickOkButton: Clicks the OK button to confirm the fusion.
 ;   - clickSuccessButton: Clicks the success button after fusion.
-;   - closeSuperComputer: Closes the supercomputer interface.
 ; Parameters: None
 ; Return: None
 ; ----------------------------------------------------------------------------------------
@@ -207,6 +191,9 @@ fusePets() {
     for pet in petsToFuse {
         petNumber := 0
         Loop {
+            if petNumber > 4
+                break
+
             currentPet := [firstPet[1] + (petOffset[1] * petNumber), firstPet[2]]  ; Calculate the coordinates for the current pet.
             openSupercomputer()  ; Open the supercomputer interface.
             findAndClickFuseButton()  ; Find and click the fuse button.
@@ -222,6 +209,7 @@ fusePets() {
             if canBeFused {
                 clickOkButton()  ; Click the OK button to confirm the fusion.
                 clickSuccessButton()  ; Click the success button after fusion.
+                break  ; Exit the loop after successful fusion.
             } else {
                 petNumber += 1  ; Move to the next pet if the current pet cannot be fused.
                 closeSuperComputer()  ; Close the supercomputer interface.
@@ -883,18 +871,12 @@ getSetting(keyName) {
 ; Description: Completes a series of initialization tasks to set up the environment for the Roblox macro.
 ; Operation:
 ;   - Updates the tray icon.
-;   - Creates a folder for logs.
-;   - Clears any previous OCR results.
 ;   - Resizes the Roblox window to address scaling issues.
-;   - Replaces the Roblox fonts for better readability.
 ;   - Defines hotkeys for various macro functions.
 ;   - Zooms the camera out to the maximum level.
 ; Dependencies:
 ;   - updateTrayIcon: Updates the tray icon.
-;   - createLogsFolder: Creates a folder for logs.
-;   - clearOcrResult: Clears any previous OCR results.
 ;   - resizeRobloxWindow: Resizes the Roblox window to specific dimensions.
-;   - replaceRobloxFonts: Replaces the Roblox fonts.
 ;   - defineHotKeys: Defines hotkeys for various macro functions.
 ;   - zoomCameraOut: Zooms the camera out to the maximum level.
 ; Parameters: None
@@ -903,7 +885,6 @@ getSetting(keyName) {
 completeInitialisationTasks() {
     updateTrayIcon()  ; Update the tray icon.
     resizeRobloxWindow()  ; Resize the Roblox window to address scaling issues.
-    replaceRobloxFonts()  ; Replace the Roblox fonts for better readability.
     defineHotKeys()  ; Define hotkeys for various macro functions.
 }
 
@@ -931,45 +912,4 @@ defineHotKeys() {
 updateTrayIcon() {
     iconFile := A_WorkingDir . "\Assets\PS99_Fuse_Machine.ico"  ; Set the tray icon file path.
     TraySetIcon iconFile  ; Apply the new tray icon.
-}
-
-
-; ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
-; FONT FUNCTIONS
-; ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
-
-; ----------------------------------------------------------------------------------------
-; changeToDefaultFont Function
-; Description: Copies specific font files to the Roblox font directory to update the default fonts.
-; Operation:
-;   - Copies the 'FredokaOne-Regular.ttf' font file to the Roblox font path.
-;   - Copies the 'SourceSansPro-Bold.ttf' font file to the Roblox font path.
-; Parameters:
-;   - *: Indicates the function may potentially accept parameters, though not used here.
-; Dependencies:
-;   - FREDOKA_ONE_REGULAR, SOURCE_SANS_PRO_BOLD: Global variables holding the paths to the font files.
-;   - g_robloxFontPath: Global variable holding the path to the Roblox font directory.
-;   - FileCopy: Function used to copy files.
-; Return: None; modifies the file system by updating font files in Roblox directory.
-; ----------------------------------------------------------------------------------------
-changeToDefaultFont(*) {
-    robloxFontPath := StrReplace(WinGetProcessPath("ahk_exe RobloxPlayerBeta.exe"), "RobloxPlayerBeta.exe", "") "content\fonts\"  ; Path to Roblox fonts directory.
-    FileCopy FREDOKA_ONE_REGULAR, robloxFontPath "FredokaOne-Regular.ttf", true  ; Copy Fredoka One font.
-    FileCopy SOURCE_SANS_PRO_BOLD, robloxFontPath "SourceSansPro-Bold.ttf", true  ; Copy Source Sans Pro Bold font.
-}
-
-; ----------------------------------------------------------------------------------------
-; replaceRobloxFonts Function
-; Description: Replaces default Roblox fonts with the Times New Roman font for consistent text rendering.
-; Operation:
-;   - Copies the Times New Roman font file to overwrite the 'FredokaOne-Regular.ttf' and 'SourceSansPro-Bold.ttf' files in the Roblox font directory.
-; Dependencies:
-;   - FileCopy: Function used to copy files.
-;   - TIMES_NEW_ROMAN, g_robloxFontPath: Global variables specifying the source font file and the destination font path.
-; Return: None; updates the file system by copying font files.
-; ----------------------------------------------------------------------------------------
-replaceRobloxFonts() {
-    robloxFontPath := StrReplace(WinGetProcessPath("ahk_exe RobloxPlayerBeta.exe"), "RobloxPlayerBeta.exe", "") "content\fonts\"  ; Path to Roblox fonts directory.
-    FileCopy TIMES_NEW_ROMAN, robloxFontPath "FredokaOne-Regular.ttf", true  ; Replace 'FredokaOne-Regular' with Times New Roman.
-    FileCopy TIMES_NEW_ROMAN_INVERTED, robloxFontPath "SourceSansPro-Bold.ttf", true  ; Replace 'SourceSansPro-Bold' with Times New Roman (Inverted).
 }
